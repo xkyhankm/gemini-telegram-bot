@@ -39,3 +39,12 @@ if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
     # Telegram botunu başlat
     bot.infinity_polling()
+
+    def send_long_message(chat_id, text):
+    # Metni 4000 karakterlik parçalara böler
+    for i in range(0, len(text), 4000):
+        bot.send_message(chat_id, text[i:i+4000])
+
+# Kullanımı:
+# bot.send_message(message.chat.id, response.text) yerine:
+send_long_message(message.chat.id, response.text)
