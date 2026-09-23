@@ -26,11 +26,17 @@ model = genai.GenerativeModel('gemini-3.5-flash-lite')
 # Telegram Bot
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
+# Uzun mesajları parçalayarak gönderen fonksiyon
+def send_long_message(chat_id, text):
+    for i in range(0, len(text), 4000):
+        bot.send_message(chat_id, text[i:i+4000])
+
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
     try:
         response = model.generate_content(message.text)
-        bot.reply_to(message, response.text)
+        # Doğrudan reply_to yerine uzun mesaj desteği sağlayan fonksiyonu çağırıyoruz
+        send_long_message(message.chat.id, response.text)
     except Exception as e:
         bot.reply_to(message, f"Hata oluştu: {str(e)}")
 
@@ -39,12 +45,3 @@ if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
     # Telegram botunu başlat
     bot.infinity_polling()
-
-    def send_long_message(chat_id, text):
-    # Metni 4000 karakterlik parçalara böler
-    for i in range(0, len(text), 4000):
-        bot.send_message(chat_id, text[i:i+4000])
-
-# Kullanımı:
-# bot.send_message(message.chat.id, response.text) yerine:
-send_long_message(message.chat.id, response.text)
